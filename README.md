@@ -1,7 +1,7 @@
 # offline-leaflet-clean
 该项目致力于集成地图开发的大部分常规功能，样例可直接拿来用作二次开发，功能详情可参考个人博客（包括轨迹、热力图、搜索框、用户标注、测量、经纬度、动画...）
 # 地图效果
-<img src="pic2.png" alt="image" style="zoom:50%;" />
+<img src="pic1.png" alt="image" style="zoom:50%;" />
 
 
 # 详情功能参考个人博客：
