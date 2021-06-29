@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>Offline Map by WHU</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <!-- 导入外部的js或者css  （组件的依赖） -->
+    <link rel="stylesheet" href="./css/leaflet.css"/>
+    <script src="./js/leaflet.js"></script>
+    <script src= "./js/leaflet-heat.js"></script>
+ 
+
+    <!-- 测量工具 Leaflet.PolylineMeasure-->
+    <script src="./js/Lealet.PolylineMeasure.js"></script>
+    <link rel="stylesheet" href="./css/Leaflet.PolylineMeasure.css" />
+
+ 
+
+    <!-- 搜索框 谷歌风格 -->
+    <!-- <script src="https://code.jquery.com/jquery-1.12.1.min.js"></script> -->
+    <script src="./js/jquery.min.js"></script> 
+    <script src="https://cdn.bootcdn.net/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+    <script src="./js/leaflet.customsearchbox.min.js"></script>
+    <link href="./css/searchbox.min.css" rel="stylesheet" />
+ 
+    <!-- 搜索框补全功能jquery -->
+    <!-- <script type="text/javascript"  src="http://code.jquery.com/jquery-1.8.3.js"></script> -->
+    <script src="http://libs.baidu.com/jquery/1.8.3/jquery.js"></script>    
+    <script src="https://cdn.bootcdn.net/ajax/libs/jqueryui/1.10.3/jquery-ui.js"></script>
+    <!-- <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" /> -->
+<!-- 动画轨迹js -->
+<script type="text/javascript" src="./js/MovingMarker.js"></script>
+    <!-- 导入外部json -->
+    <script type="text/javascript" src="./json/geoJson2.js"></script>
+    <script type="text/javascript" src="./json/circleCenter.js"></script>
+    <script type="text/javascript" src="./json/heatpoint.js"></script>
+    <script type="text/javascript" src="./json/airplane.js"></script>
+
+
+    <style>
+      * 
+      * { margin: 0; padding: 0; }
+  html, body { height: 100%; }
+      /* html,body {
+          padding: 0;
+          margin: 0 auto;
+          width: 100%;
+          height: 100%;
+          min-width: 100%;
+      } */
+      #map {
+          width: 100%;
+          height: 100%;
+      }
+
+      /* 自动补全的css */
+      .ui-autocomplete{height:250px; overflow-y: scroll; overflow-x: hidden;}
+     .ui-autocomplete {
+      z-index: 10000000;
+      }
+      .ui-helper-hidden-accessible {
+            display: none;
+        }
+
+    .ui-helper-hidden-accessible {display:none;}
+    .ui-autocomplete { position: absolute; cursor: default; border-radius: 3px; border: 1px solid #c0c0c0; }  
+    .ui-menu {list-style: none;padding: 0;margin: 0;display: block;outline: none;}
+    .ui-menu .ui-menu-item a {text-decoration:none;display:block;padding:.2em .4em;line-height:1.5;zoom:1;font-size: medium;}
+    
+ /* .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {background: #ff8a00;border: none;color:#000;border-radius:0;font-weight: normal;} */
+
+ .ui-widget-content {
+    background: #FFFFFF !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    padding-top: 0px;
+    padding-bottom: 5px;
+    width: 30% !important;
+}
+
+.ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus {
+    /*border: 1px solid #FFF !important;
+    background: #FFF !important;
+    font-weight: normal !important;
+    color: #FFF;*/
+    border: 0px solid #FFF !important;
+    background: #F34541 !important;
+    color: white;
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.42857;
+    white-space: nowrap;
+}
+
+.ui-menu-item {
+    padding: 3px 20px !important;
+}
+
+ 
+  </style>
+
+	
+</head>
+<body>
+<div id="map" >
+
+ 
+</div>
+
+
+
+
+<!-- 导入画图组件的依赖 -->
+<script src='./js/leaflet.draw.js'></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.4.10/leaflet.draw.css"/>
+
+<script src="./js/leaflet.latlng-graticule.js"></script>
+
+ 
+<script>
+//----------------绘制底图
+var mymap = L.map('map').setView([ 20,120], 5);
+mymap.zoomControl.setPosition('topright');
+ 
+//----------------------------------------------------------------
+
+     
+
+// var url = 'http://localhost:8080/xyz/roadmap/{z}/{x}/{y}.png';
+// var url = './roadmap/{z}/{x}/{y}.png'
+// var url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+var url = "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw"
+L.tileLayer( url , {
+  maxZoom: 18,
+  minZoom:2,
+  id: 'mapbox/streets-v11',
+  tileSize: 512,
+  zoomOffset: -1
+}).addTo(mymap);
+ 
+
+// --------------------------------------------绘制经纬度网格线 Specify divisions every 10 degrees
+// 定义经纬度图层为全局变量
+
+var latlngLayer = L.latlngGraticule({
+            weight: "2.0",
+            color: '#101010',
+            showLabel: true,
+            dashArray: [5, 5],
+            zoomInterval: [
+                {start: 2, end: 3, interval: 30},
+                {start: 4, end: 4, interval: 10},
+                {start: 5, end: 7, interval: 5},
+                {start: 8, end: 10, interval: 1}
+            ]
+        })
+var addlatlngGraticuleLayer = function(){
+  
+    latlngLayer.addTo(mymap);
+}
+ 
+//---------------------------------------------绘制geoJson中的轨迹：面、线  上各自的颜色
+var allLayers = []
+// 定义全局变量GeoJson参数
+var myStyle = {
+            "color": '#101010',
+            "weight": 3,
+            "opacity": 0.5,
+
+        };
+var layerGeo = L.geoJSON(states, {
+    style: function (feature) {
+      if(feature.geometry.type == "LineString") {
+      return {color: feature.properties.color}
+    }
+      else {
+        return {color: feature.properties.color}
+      }
+    }
+  })
+var addGeoJsonLayer = function(){
+  layerGeo.addTo(mymap)
+  allLayers.push(layerGeo)
+  // console.log(states[0].geometry.coordinates)
+  mymap.setView([states[0].geometry.coordinates[0][1],states[0].geometry.coordinates[0][0]], 5)
+}
+
+// var geoJSONTDLayer = L.timeDimension.layer.geoJson(layerGeo, {
+//     updateTimeDimension: true,
+//     duration: 'PT2M',
+//     updateTimeDimensionMode: 'replace',
+//     addlastPoint: true
+// });
+// mymap.addLayer(geoJSONTDLayer)
+
+
+// mymap.addLayer(layerGeo);
+// L.geoJSON(states).addTo(mymap);
+
+//---------------------------------------------给定一串坐标点，分别绘制圆
+var layerCircle = []; //定义全局变量
+var addCircleLayer = function() {
+  for (let index = 0; index < circleCenter.length; index++) {
+    layerCircle.push(
+      L.circle(
+      circleCenter[index].geometry.coordinates[0][0], {radius:circleCenter[index].properties.radius,
+        color:"0",
+        fillColor: circleCenter[index].properties.color,
+        fillOpacity:"0.4"} 
+      )
+    )
+  }
+  for (let index = 0; index < layerCircle.length; index++) {
+    mymap.addLayer(layerCircle[index])
+  }
+  mymap.setView(circleCenter[0].geometry.coordinates[0][0],5)
+}
+
+
+//---------------------------------------------增加热力图  lat, lng, intensity
+var layerHeat = L.heatLayer(heatpoint, {radius: 10}); //定义全局变量
+var addHeatLayer = function() {
+  mymap.addLayer(layerHeat);
+  // console
+  mymap.setView([heatpoint[0][0],heatpoint[0][1]],5)
+}
+
+ 
+
+//---------------------------------------------增加右侧用户画图toolbar
+var drawnItems = new L.FeatureGroup();
+mymap.addLayer(drawnItems);
+var drawControl = new L.Control.Draw({position: 'topright',
+    edit: {
+        featureGroup: drawnItems
+    }
+});
+mymap.addControl(drawControl);
+mymap.on(L.Draw.Event.CREATED, function (event) {
+        var layer = event.layer;
+
+        drawnItems.addLayer(layer);
+    });
+
+
+//  ---------------------------------------------测量工具Leaflet.PolylineMeasure
+L.control.scale ({maxWidth:240, metric:true, imperial:false, position: 'bottomleft'}).addTo (mymap);
+let polylineMeasure = L.control.polylineMeasure ({position:'topright', unit:'metres', showBearings:true, clearMeasurementsOnStop: false, showClearControl: true, showUnitControl: true})
+polylineMeasure.addTo (mymap);
+
+function debugevent(e) { console.debug(e.type, e, polylineMeasure._currentLine) }
+
+mymap.on('polylinemeasure:toggle', debugevent);
+mymap.on('polylinemeasure:start', debugevent);
+mymap.on('polylinemeasure:resume', debugevent);
+mymap.on('polylinemeasure:finish', debugevent);
+mymap.on('polylinemeasure:clear', debugevent);
+mymap.on('polylinemeasure:add', debugevent);
+mymap.on('polylinemeasure:insert', debugevent);
+mymap.on('polylinemeasure:move', debugevent);
+mymap.on('polylinemeasure:remove', debugevent);
+ 
+// ----------------------------------------------------------------------------
+ 
+
+// ----------------------------------谷歌搜索框
+var searchboxControl=createSearchboxControl();
+
+        var control = new searchboxControl({
+            sidebarTitleText: 'LayerControl',
+            sidebarMenuItems: {
+                Items: [
+                    { type: "button", name1: "显示经纬线", onclick1: "addlatlngGraticuleLayer()", name2: "关闭",onclick2: "clearLatLngLayer()", icon: "icon-local-carwash" },
+                    { type: "button", name1: "显示轨迹", onclick1: "addGeoJsonLayer()", name2: "关闭",onclick2:"clearGeoJsonLayer()",icon: "icon-local-carwash" },
+                    { type: "button", name1: "显示范围", onclick1: "addCircleLayer()", name2: "关闭", onclick2: "clearCircleLayer()", icon: "icon-cloudy" },
+                    { type: "button", name1: "热力图", onclick1: "addHeatLayer()", name2: "关闭",onclick2:"clearHeatLayer()",icon: "icon-potrait" },
+                    // { type: "button", name1: "显示动画", onclick1: "add()", name2: "关闭",onclick2:"clear()",icon: "icon-potrait" },
+                    // { type: "button", name: "清空全部图层", onclick: "clearAllLayer()", icon: "icon-local-dining" },
+                    // { type: "button", name: "清空标记", onclick: "clearMarkers()", icon: "icon-local-dining" },
+                    // { type: "link", name: "Link 3 (stackoverflow.com)", href: 'http://stackoverflow.com', icon: "icon-bike" },
+
+                ],
+                Items2: [
+                 { type: "button", name: "清空全部图层", onclick: "clearAllLayer()", icon: "icon-local-dining" },
+                ]
+            }
+        });
+		
+		// // 保存city的名字
+    //     var cityData = []
+    //     for (let i = 0; i < planeData.length; i++) {
+    //       cityData.push(planeData[i].title);
+    //     }
+
+    //     var markers = [] //此为全局变量 不要写进下面的click事件中  将每一个marker存进markers数组中
+        control._searchfunctionCallBack = function (searchkeywords)
+        {
+            
+          }
+
+          
+
+        mymap.addControl(control);
+
+
+    //     function button2_click()
+    // {
+    //     alert('button 2 clicked !!!');
+
+    // }
+
+  // 监听回车键
+//     $('#searchboxinput').bind('keypress', function(event) {
+//     if (event.keyCode == "13") {
+//       $('#searchbox-searchbutton').click();
+//         // alert("wawawaw")
+//     }
+// });
+
+
+
+
+// ----------------------------------------------搜索框自动补全 jquery----------------------
+
+// var cityData = []
+// for (let i = 0; i < planeData.length; i++) {
+//   cityData.push(planeData[i].title);
+// }
+// //自动填充1
+//               $( "#searchboxinput" ).autocomplete({
+//                source: cityData,
+//                     messages: {
+//               noResults: '',
+//               results: function() {}
+//                 }
+//              });
+
+          
+
+
+ 
+
+// ----------------------------------------------------清除所有图层---------------------------------------------
+var clearAllLayer = function(){
+mymap.eachLayer(function (layer) {
+    if (!layer._container || ('' + jQuery(layer._container).attr('class')).replace(/\s/g, '') != 'leaflet-layer') {
+        layer.remove();
+    }
+    console.log(layer)
+    // L.latlngGraticule({
+    //         weight: "2.0",
+    //         color: '#101010',
+    //         showLabel: true,
+    //         dashArray: [5, 5],
+    //         zoomInterval: [
+    //             {start: 2, end: 3, interval: 30},
+    //             {start: 4, end: 4, interval: 10},
+    //             {start: 5, end: 7, interval: 5},
+    //             {start: 8, end: 10, interval: 1}
+    //         ]
+    //     }).addTo(mymap);
+});
+}
+// -------------------------清除markers的方法
+var clearMarkers = function (){
+  for(i in markers){
+      mymap.removeLayer(markers[i])    
+    }
+
+    
+}
+// -------------------------清除
+var clearLatLngLayer = function (){
+      mymap.removeLayer(latlngLayer)
+}
+//--------------------------清除轨迹图层GeoJson的方法
+var clearGeoJsonLayer = function (){
+     mymap.removeLayer(layerGeo)
+}
+//--------------------------清除Circle的方法
+var clearCircleLayer = function(){
+  for (let index = 0; index < layerCircle.length; index++) {
+    mymap.removeLayer(layerCircle[index]) 
+  }
+}
+//-------------------------清除HeatLayer的方法
+var clearHeatLayer = function(){
+  mymap.removeLayer( layerHeat );
+}
+
+</script>
+
+  
+ 
+      
+</body>
+
+</html>
