@@ -1,4 +1,5 @@
 # offline-leaflet-clean
+This project aims to integrate most of the common features of map development, and the sample code can be directly used for secondary development. For more detailed information on features, including trajectory, heatmap, search box, user annotation, measurement, longitude and latitude, animation, etc., please refer to my personal blog.
 该项目致力于集成地图开发的大部分常规功能，样例可直接拿来用作二次开发，功能详情可参考个人博客（包括轨迹、热力图、搜索框、用户标注、测量、经纬度、动画...）
 # 地图效果
 <img src="pic1.png" alt="image" style="zoom:50%;" />
